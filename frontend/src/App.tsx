@@ -10,6 +10,7 @@ import { CurriculumMapping } from './pages/teacher/CurriculumMapping';
 import { NotFound } from './pages/NotFound';
 import { AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -20,11 +21,20 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="login" element={<Login />} />
-          <Route path="/student" element={<StudentHome />} />
-          <Route path="/student/module/:id" element={<ModuleDetail />} />
-          <Route path="/teacher" element={<TeacherHome />} />
-          <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-          <Route path="/teacher/curriculum" element={<CurriculumMapping />} />
+          
+          {/* Student Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+            <Route path="/student" element={<StudentHome />} />
+            <Route path="/student/module/:id" element={<ModuleDetail />} />
+          </Route>
+          
+          {/* Teacher Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['teacher']} />}>
+            <Route path="/teacher" element={<TeacherHome />} />
+            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+            <Route path="/teacher/curriculum" element={<CurriculumMapping />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

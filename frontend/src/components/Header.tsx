@@ -1,22 +1,35 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, User, Moon, Sun } from 'lucide-react';
-import { motion } from 'framer-motion';
-
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, BookOpen, User, Moon, Sun } from "lucide-react";
+import { motion } from "framer-motion";
+import { useAuth } from "../hooks/useAuth";
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
+  // Base navigation items (always visible)
+  const baseNavigation = [
+    { name: "Home", href: "/" },
+    { name: "Resources", href: "#" },
+    { name: "About", href: "#" },
+  ];
+
+  // Only add portal links if user is logged in
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Student Portal', href: '/student' },
-    { name: 'Teacher Portal', href: '/teacher' },
-    { name: 'Resources', href: '#' },
-    { name: 'About', href: '#' },
+    ...baseNavigation,
+    ...(user
+      ? [
+          {
+            name: user.role === "student" ? "Student Portal" : "Teacher Portal",
+            href: user.role === "student" ? "/student" : "/teacher",
+          },
+        ]
+      : []),
   ];
 
   const isActive = (path: string) => {
@@ -30,7 +43,9 @@ export const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <BookOpen className="h-8 w-8 text-primary-600" />
-              <span className="ml-2 text-lg font-display font-bold text-primary-700">WellnessWise</span>
+              <span className="ml-2 text-lg font-display font-bold text-primary-700">
+                WellnessWise
+              </span>
             </Link>
             <nav className="hidden md:ml-8 md:flex md:space-x-8">
               {navigation.map((item) => (
@@ -39,8 +54,8 @@ export const Header = () => {
                   to={item.href}
                   className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${
                     isActive(item.href)
-                      ? 'border-primary-500 text-primary-700'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                      ? "border-primary-500 text-primary-700"
+                      : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                   }`}
                 >
                   {item.name}
@@ -55,22 +70,26 @@ export const Header = () => {
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <Link
-              to="/login"
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/login";
+              }}
               className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <User className="h-4 w-4 mr-2" />
-              Sign In
-            </Link>
+              {user ? "Sign Out" : "Sign In"}
+            </button>
             <div className="md:hidden ml-4">
               <button
                 onClick={toggleMenu}
                 className="p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
               >
                 {isOpen ? (
-                  <X className="h-6 w-6\" aria-hidden="true" />
+                  <X className="h-6 w-6" aria-hidden="true" />
                 ) : (
-                  <Menu className="h-6 w-6\" aria-hidden="true" />
+                  <Menu className="h-6 w-6" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -80,10 +99,10 @@ export const Header = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <motion.div 
+        <motion.div
           className="md:hidden"
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
+          animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.2 }}
         >
@@ -94,8 +113,8 @@ export const Header = () => {
                 to={item.href}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive(item.href)
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                 }`}
                 onClick={() => setIsOpen(false)}
               >
